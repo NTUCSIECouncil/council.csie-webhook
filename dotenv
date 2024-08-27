@@ -1,0 +1,5 @@
+SECRET=super_secret_secret
+PORT=4000
+BRANCH=main
+BACKEND=council_backend
+FRONTEND=council_frontend
