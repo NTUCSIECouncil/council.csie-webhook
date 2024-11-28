@@ -55,7 +55,7 @@ app.post('/', express.json({type: 'application/json'}), (request, response) => {
     const branch = (request.body.ref as string).substring(11);
     if (branch === BRANCH) {
       console.log(`${new Date().toLocaleString()} => someone pushed to ${BRANCH}. Started pulling & restarting.`);
-      exec(`./pull_and_restart.sh ${PM2_FRONTEND} ${PM2_BACKEND}`, (error, stdout, stderr) => {
+      exec(`./pull_and_restart.sh "${PM2_FRONTEND}" "${PM2_BACKEND}"`, (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;
@@ -64,7 +64,7 @@ app.post('/', express.json({type: 'application/json'}), (request, response) => {
             console.log(`stderr: ${stderr}`);
         }
         console.log(`${new Date().toLocaleString()} => Restarted successfully.`);
-    });
+      });
     }
   }
 });
