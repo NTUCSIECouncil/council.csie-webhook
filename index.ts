@@ -8,7 +8,7 @@ import { exec } from 'child_process';
 import trackingServices from './tracking_services';
 
 dotenv.config();
-if (process.env.SECRET === undefined || process.env.PORT === undefined || process.env.BRANCH === undefined) {
+if (process.env.SECRET === undefined || process.env.PORT === undefined) {
   console.log('No environment variables. Maybe missing .env?');
   exit(1);
 }
