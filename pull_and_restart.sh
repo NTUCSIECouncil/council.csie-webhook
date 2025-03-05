@@ -14,7 +14,7 @@ fi
 
 eval $(ssh-agent)
 ssh-add repo_key
-cd "../$1"
+cd "$1"
 git pull
 
 pm2 restart "$2"
