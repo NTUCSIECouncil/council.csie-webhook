@@ -59,7 +59,20 @@ app.post('/', express.json({type: 'application/json'}), (request, response) => {
         continue;
 
       console.log(`Someone pushed to ${service.name}. Started pulling & restarting.`);
-      exec(`./pull_and_restart.sh "${service.directory}" "${service.nameOnPm2}"`, (error, stdout, stderr) => {
+      if (service.hasOwnProperty('buildCommand')) {
+          console.log(`Building with: ${service.buildCommand}`)
+          exec(`cd ${service.path} && ${service.buildCommand}`, (error, stdout, stderr) => {
+            if (error) {
+              console.log(`error: ${error.message}`);
+              return;
+            }
+            if (stderr) {
+              console.log(`stderr: ${stderr}`);
+            }
+            console.log(`Built successfully.`);
+          });
+      }
+      exec(`./pull_and_restart.sh "${service.path}" "${service.nameOnPm2}"`, (error, stdout, stderr) => {
         if (error) {
           console.log(`error: ${error.message}`);
           return;
