@@ -5,7 +5,7 @@ import { exit } from 'process';
 import { ParamsDictionary } from 'express-serve-static-core';
 import QueryString from 'qs';
 import { exec } from 'child_process';
-import trackingServices from 'tracking_services';
+import trackingServices from './tracking_services';
 
 dotenv.config();
 if (process.env.SECRET === undefined || process.env.PORT === undefined || process.env.BRANCH === undefined) {
@@ -54,7 +54,7 @@ app.post('/', express.json({type: 'application/json'}), (request, response) => {
 
     const branch = (request.body.ref as string).substring("refs/heads/".length);
     const repository = request.body.repository.full_name;
-    for (service of trackingServices) {
+    for (const service of trackingServices) {
       if (service.branch !== branch || service.repository !== repository)
         continue;
 
