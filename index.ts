@@ -5,18 +5,15 @@ import { exit } from 'process';
 import { ParamsDictionary } from 'express-serve-static-core';
 import QueryString from 'qs';
 import { exec } from 'child_process';
+import trackingServices from 'tracking_services';
 
 dotenv.config();
 if (process.env.SECRET === undefined || process.env.PORT === undefined || process.env.BRANCH === undefined) {
-    console.log('No environment variables. Maybe missing .env?');
-    exit(1);
+  console.log('No environment variables. Maybe missing .env?');
+  exit(1);
 }
 const SECRET = process.env.SECRET;
 const PORT = process.env.PORT;
-const BRANCH = process.env.BRANCH;
-const PM2_FRONTEND = process.env.FRONTEND;
-const PM2_BACKEND = process.env.BACKEND;
-const PM2_WEBHOOK = process.env.WEBHOOK;
 
 const verify_signature = (req: express.Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>
 ) => {
@@ -52,16 +49,23 @@ app.post('/', express.json({type: 'application/json'}), (request, response) => {
     console.log('GitHub sent the ping event');
   }
   else if (githubEvent === 'push') {
-    const branch = (request.body.ref as string).substring(11);
-    if (branch === BRANCH) {
-      console.log(`${new Date().toLocaleString()} => someone pushed to ${BRANCH}. Started pulling & restarting.`);
-      exec(`./pull_and_restart.sh "${PM2_FRONTEND}" "${PM2_BACKEND}"`, (error, stdout, stderr) => {
+    if (!(request.body.ref as string).startsWith("refs/heads/")) // not pushed to a branch
+      return;
+
+    const branch = (request.body.ref as string).substring("refs/heads/".length);
+    const repository = request.body.repository.full_name;
+    for (service of trackingServices) {
+      if (service.branch !== branch || service.repository !== repository)
+        continue;
+
+      console.log(`Someone pushed to ${service.name}. Started pulling & restarting.`);
+      exec(`./pull_and_restart.sh "${service.directory}" "${service.nameOnPm2}"`, (error, stdout, stderr) => {
         if (error) {
-            console.log(`error: ${error.message}`);
-            return;
+          console.log(`error: ${error.message}`);
+          return;
         }
         if (stderr) {
-            console.log(`stderr: ${stderr}`);
+          console.log(`stderr: ${stderr}`);
         }
         console.log(`Restarted successfully.`);
       });
@@ -70,5 +74,5 @@ app.post('/', express.json({type: 'application/json'}), (request, response) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`The application is listening on port ${PORT} and updates on branch ${BRANCH}`);
+  console.log(`The application is listening on port ${PORT}`);
 })
