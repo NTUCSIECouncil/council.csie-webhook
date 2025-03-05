@@ -63,7 +63,7 @@ app.post('/', express.json({type: 'application/json'}), (request, response) => {
         if (stderr) {
             console.log(`stderr: ${stderr}`);
         }
-        console.log(`${new Date().toLocaleString()} => Restarted successfully.`);
+        console.log(`Restarted successfully.`);
       });
     }
   }
