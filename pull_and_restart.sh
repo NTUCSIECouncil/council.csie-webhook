@@ -15,6 +15,6 @@ fi
 eval $(ssh-agent)
 ssh-add repo_key
 cd "$1"
-git pull
+git pull --recurse-submodules
 
 pm2 restart "$2"
